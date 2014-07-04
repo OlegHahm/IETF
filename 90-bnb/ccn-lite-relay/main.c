@@ -33,11 +33,7 @@
 
 int relay_pid;
 
-char t2_stack[KERNEL_CONF_STACKSIZE_PRINTF];
-
-#define CCNL_DEFAULT_MAX_CACHE_ENTRIES  1
-#define CCNL_DEFAULT_THRESHOLD_PREFIX   1
-#define CCNL_DEFAULT_THRESHOLD_AGGREGATE 2
+char t2_stack[KERNEL_CONF_STACKSIZE_MAIN];
 
 void set_address_handler(uint16_t a)
 {
@@ -77,12 +73,10 @@ int main(void)
 
     relay_pid = thread_getpid();
 
-    thread_create(t2_stack, KERNEL_CONF_STACKSIZE_PRINTF, PRIORITY_MAIN + 1, CREATE_STACKTEST, second_thread, "helper thread");
+    thread_create(t2_stack, KERNEL_CONF_STACKSIZE_MAIN, PRIORITY_MAIN + 1, CREATE_STACKTEST, second_thread, "helper thread");
 
     printf("starting ccn-lite relay...\n");
-    ccnl_riot_relay_start(CCNL_DEFAULT_MAX_CACHE_ENTRIES,
-                          CCNL_DEFAULT_THRESHOLD_PREFIX,
-                          CCNL_DEFAULT_THRESHOLD_AGGREGATE);
+    ccnl_riot_relay_start();
 
     return 0;
 }

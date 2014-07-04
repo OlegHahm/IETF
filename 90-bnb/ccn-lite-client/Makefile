@@ -35,7 +35,7 @@ USEMODULE += posix
 USEMODULE += ps
 USEMODULE += random
 USEMODULE += defaulttransceiver
-USEMODULE += rtc
+USEMODULE += vtimer
 USEMODULE += ccn_lite
 USEMODULE += ccn_lite_client
 
