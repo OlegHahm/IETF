@@ -79,7 +79,7 @@ int main(void)
                   CREATE_STACKTEST, second_thread, NULL, "helper thread");
 
     printf("starting ccn-lite relay...\n");
-    ccnl_riot_relay_start();
+    ccnl_riot_relay_start(NULL);
 
     return 0;
 }
