@@ -20,7 +20,7 @@
 #include "vtimer.h"
 #include "ps.h"
 #include "ltc4150.h"
-#include "destiny.h"
+#include "socket_base.h"
 #include "net_if.h"
 
 #define ENABLE_DEBUG (1)
@@ -34,10 +34,10 @@
 #define RIOT_CCN_APPSERVER (1)
 #define RIOT_CCN_TESTS (0)
 
-long long relay_stack[KERNEL_CONF_STACKSIZE_MAIN];
+char relay_stack[KERNEL_CONF_STACKSIZE_MAIN];
 
 #if RIOT_CCN_APPSERVER
-long long appserver_stack[KERNEL_CONF_STACKSIZE_MAIN];
+char appserver_stack[KERNEL_CONF_STACKSIZE_MAIN];
 #endif
 int relay_pid, appserver_pid;
 
@@ -133,7 +133,7 @@ static void riot_ccn_relay_config(int argc, char **argv)
     msg_t m;
     m.content.value = atoi(argv[1]);
     m.type = CCNL_RIOT_CONFIG_CACHE;
-    msg_send(&m, relay_pid, 1);
+    msg_send(&m, relay_pid);
 }
 
 static void riot_ccn_transceiver_start(int relay_pid)
@@ -186,7 +186,7 @@ static void riot_ccn_relay_stop(int argc, char **argv)
     msg_t m;
     m.content.value = 0;
     m.type = CCNL_RIOT_HALT;
-    msg_send(&m, relay_pid, 1);
+    msg_send(&m, relay_pid);
 
     /* mark relay as not running */
     relay_pid = 0;
@@ -231,7 +231,7 @@ static void riot_ccn_pit_test(int argc, char **argv)
         m.content.ptr = (char *) &rmsg;
         m.type = CCNL_RIOT_MSG;
 
-        msg_send(&m, relay_pid, 1);
+        msg_send(&m, relay_pid);
 
         if ((segment % 50) == 0) {
             vtimer_now(&now);
@@ -280,7 +280,7 @@ static void riot_ccn_populate(int argc, char **argv)
     msg_t m;
     m.content.value = 0;
     m.type = CCNL_RIOT_POPULATE;
-    msg_send(&m, relay_pid, 1);
+    msg_send(&m, relay_pid);
 }
 
 static void riot_ccn_stat(int argc, char **argv)
@@ -291,7 +291,7 @@ static void riot_ccn_stat(int argc, char **argv)
     msg_t m;
     m.content.value = 0;
     m.type = CCNL_RIOT_PRINT_STAT;
-    msg_send(&m, relay_pid, 1);
+    msg_send(&m, relay_pid);
 }
 
 static const shell_command_t sc[] = {

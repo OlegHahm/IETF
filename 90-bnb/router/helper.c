@@ -25,7 +25,7 @@
 #include "sixlowpan/ip.h"
 #include "transceiver.h"
 #include "ieee802154_frame.h"
-#include "rpl_structs.h"
+#include "rpl/rpl_structs.h"
 
 #include "demo.h"
 
@@ -142,7 +142,7 @@ void rpl_udp_ignore(int argc, char **argv)
     if (argc == 2) {
         a = atoi(argv[1]);
         printf("sending to transceiver (%u): %u\n", transceiver_pid, (*(uint8_t *)tcmd.data));
-        msg_send(&mesg, transceiver_pid, 1);
+        msg_send(&mesg, transceiver_pid);
     }
     else {
         printf("Usage: %s <addr>\n", argv[0]);

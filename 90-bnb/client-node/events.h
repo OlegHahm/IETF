@@ -20,7 +20,7 @@ typedef enum {
     CONFIRM = 5,
     WARN = 6,
     DISARMED = 7,
-    RESET = 8
+    EVT_RESET = 8
 } evt_t;
 
 

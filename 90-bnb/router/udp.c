@@ -14,7 +14,7 @@
 
 #include "thread.h"
 
-#include "destiny/socket.h"
+#include "socket_base/socket.h"
 
 #include "net_help.h"
 
@@ -26,7 +26,7 @@
 #define UDP_BUFFER_SIZE     (128)
 #define SERVER_PORT     (0xFF01)
 
-long long udp_server_stack_buffer[KERNEL_CONF_STACKSIZE_MAIN];
+char udp_server_stack_buffer[KERNEL_CONF_STACKSIZE_MAIN];
 char addr_str[IPV6_MAX_ADDR_STR_LEN];
 char buffer_main[UDP_BUFFER_SIZE];
 
@@ -57,7 +57,7 @@ static void *init_udp_server(void *arg)
     sockaddr6_t sa;
     int32_t recsize;
     uint32_t fromlen;
-    int sock = destiny_socket(PF_INET6, SOCK_DGRAM, IPPROTO_UDP);
+    int sock = socket_base_socket(PF_INET6, SOCK_DGRAM, IPPROTO_UDP);
 
     memset(&sa, 0, sizeof(sa));
 
@@ -66,29 +66,29 @@ static void *init_udp_server(void *arg)
 
     fromlen = sizeof(sa);
 
-    if (-1 == destiny_socket_bind(sock, &sa, sizeof(sa))) {
+    if (-1 == socket_base_bind(sock, &sa, sizeof(sa))) {
         printf("Error bind failed!\n");
-        destiny_socket_close(sock);
+        socket_base_close(sock);
     }
 
     while (1) {
-        recsize = destiny_socket_recvfrom(sock, (void *)buffer_main, UDP_BUFFER_SIZE, 0,
+        recsize = socket_base_recvfrom(sock, (void *)buffer_main, UDP_BUFFER_SIZE, 0,
                                           &sa, &fromlen);
 
         if (recsize < 0) {
             printf("ERROR: recsize < 0!\n");
         }
 
-        printf("UDP packet of size %u received, payload: %s\n", recsize, buffer_main);
+        printf("UDP packet of size %" PRIi32 " received, payload: %s\n", recsize, buffer_main);
         printf("relaying to appserver at PID %i\n", appserver_pid);
-        m.type = CCNL_RIOT_UDP;
+        m.type = UPPER_LAYER_4;
         rmsg.size = recsize;
         rmsg.payload = buffer_main;
         m.content.ptr = (char *) &rmsg;
-        msg_send(&m, appserver_pid, 1);
+        msg_send(&m, appserver_pid);
     }
 
-    destiny_socket_close(sock);
+    socket_base_close(sock);
 
     return NULL;
 }
@@ -102,7 +102,6 @@ void udp_send(int argc, char **argv)
     int bytes_sent;
     int address;
     char text[5];
-    uint32_t fromlen = sizeof(sa);
 
     if (argc != 3) {
         printf("usage: send <addr> <text>\n");
@@ -114,7 +113,7 @@ void udp_send(int argc, char **argv)
     strncpy(text, argv[2], sizeof(text));
     text[sizeof(text) - 1] = 0;
 
-    sock = destiny_socket(PF_INET6, SOCK_DGRAM, IPPROTO_UDP);
+    sock = socket_base_socket(PF_INET6, SOCK_DGRAM, IPPROTO_UDP);
 
     if (-1 == sock) {
         printf("Error Creating Socket!");
@@ -129,7 +128,7 @@ void udp_send(int argc, char **argv)
     memcpy(&sa.sin6_addr, &ipaddr, 16);
     sa.sin6_port = HTONS(SERVER_PORT);
 
-    bytes_sent = destiny_socket_sendto(sock, (char *)text,
+    bytes_sent = socket_base_sendto(sock, (char *)text,
                                        strlen(text) + 1, 0, &sa,
                                        sizeof(sa));
 
@@ -142,5 +141,5 @@ void udp_send(int argc, char **argv)
                                             &ipaddr));
     }
 
-    destiny_socket_close(sock);
+    socket_base_close(sock);
 }

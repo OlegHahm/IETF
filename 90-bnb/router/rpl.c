@@ -12,9 +12,9 @@
 #include "thread.h"
 #include "net_if.h"
 #include "sixlowpan.h"
-#include "destiny.h"
+#include "socket_base.h"
 #include "rpl.h"
-#include "rpl_dodag.h"
+#include "rpl/rpl_dodag.h"
 #include "demo.h"
 #include "transceiver.h"
 

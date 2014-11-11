@@ -1,9 +1,9 @@
 /*
  * Copyright (C) 2013 Freie Universität Berlin
  *
- * This file is subject to the terms and conditions of the GNU Lesser General
- * Public License. See the file LICENSE in the top level directory for more
- * details.
+ * This file is subject to the terms and conditions of the GNU Lesser
+ * General Public License v2.1. See the file LICENSE in the top level
+ * directory for more details.
  */
 
 /**
@@ -132,7 +132,7 @@ static void riot_ccn_register_prefix(int argc, char **argv)
 
 static void riot_ccn_relay_config(int argc, char **argv)
 {
-    if (!relay_pid) {
+    if (_relay_pid == KERNEL_PID_UNDEF) {
         puts("ccnl stack not running");
         return;
     }
@@ -145,10 +145,10 @@ static void riot_ccn_relay_config(int argc, char **argv)
     msg_t m;
     m.content.value = atoi(argv[1]);
     m.type = CCNL_RIOT_CONFIG_CACHE;
-    msg_send(&m, relay_pid, 1);
+    msg_send(&m, _relay_pid);
 }
 
-static void riot_ccn_transceiver_start(int relay_pid)
+static void riot_ccn_transceiver_start(kernel_pid_t _relay_pid)
 {
     transceiver_init(TRANSCEIVER);
     int transceiver_pid = transceiver_start();
@@ -202,7 +202,7 @@ static void riot_ccn_relay_stop(int argc, char **argv)
     msg_t m;
     m.content.value = 0;
     m.type = CCNL_RIOT_HALT;
-    msg_send(&m, relay_pid, 1);
+    msg_send(&m, relay_pid);
 
     /* mark relay as not running */
     relay_pid = 0;
@@ -247,7 +247,7 @@ static void riot_ccn_pit_test(int argc, char **argv)
         m.content.ptr = (char *) &rmsg;
         m.type = CCNL_RIOT_MSG;
 
-        msg_send(&m, relay_pid, 1);
+        msg_send(&m, relay_pid);
 
         if ((segment % 50) == 0) {
             vtimer_now(&now);
@@ -296,7 +296,7 @@ static void riot_ccn_populate(int argc, char **argv)
     msg_t m;
     m.content.value = 0;
     m.type = CCNL_RIOT_POPULATE;
-    msg_send(&m, relay_pid, 1);
+    msg_send(&m, relay_pid);
 }
 
 static void riot_ccn_stat(int argc, char **argv)
@@ -307,7 +307,7 @@ static void riot_ccn_stat(int argc, char **argv)
     msg_t m;
     m.content.value = 0;
     m.type = CCNL_RIOT_PRINT_STAT;
-    msg_send(&m, relay_pid, 1);
+    msg_send(&m, relay_pid);
 }
 
 static const shell_command_t sc[] = {
