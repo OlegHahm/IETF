@@ -39,7 +39,7 @@
 #include "ccn_lite/ccnl-riot.h"
 #include "ccn_lite/util/ccnl-riot-client.h"
 
-#include "events.h"
+#include "../events.h"
 
 #define RIOT_CCN_APPSERVER (1)
 #define RIOT_CCN_TESTS (0)
@@ -100,6 +100,9 @@ void interest(const char *argv)
 {
     strncpy(small_buf, argv, strlen(argv)); // null terminated
     DEBUG("in='%s'\n", small_buf);
+
+    /* for demo cases */
+    vtimer_usleep(300 * 1000);
 
     int content_len = ccnl_riot_client_get(relay_pid, small_buf, (char *) big_buf); // small_buf=name to request
 
@@ -200,16 +203,17 @@ static void riot_ccn_relay_start(void)
     riot_ccn_transceiver_start(relay_pid);
 }
 
-static void blinker_thread(void *u)
+static void *blinker_thread(void *u)
 {
     (void) u;
+    unsigned i = 0;
     while (1) {
         if (state == IDLE) {
             LED_RED_OFF;
             LED_GREEN_ON;
-            vtimer_usleep(500 * 1000);
+            vtimer_usleep(100 * 1000);
             LED_GREEN_OFF;
-            vtimer_usleep(500 * 1000);
+            vtimer_usleep(100 * 1000);
         }
         else if (state == WAITING) {
             LED_RED_ON;
@@ -218,12 +222,17 @@ static void blinker_thread(void *u)
             LED_RED_OFF;
             vtimer_usleep(100 * 1000);
         }
+        /* got response */
         else {
             LED_RED_OFF;
             LED_GREEN_ON;
-            vtimer_usleep(200 * 1000);
+            vtimer_usleep(600 * 1000);
             LED_GREEN_OFF;
-            vtimer_usleep(200 * 1000);
+            vtimer_usleep(600 * 1000);
+            if (i++ > 10) {
+                i = 0;
+                state = IDLE;
+            }
         }
     }
 
@@ -427,7 +436,7 @@ int main(void)
     
     thread_create(blinker_stack, sizeof(blinker_stack),
             PRIORITY_MAIN - 1, CREATE_STACKTEST,
-            blinker_stack, NULL, "blinker");
+            blinker_thread, NULL, "blinker");
 
     puts("starting shell...");
     puts("  posix open");

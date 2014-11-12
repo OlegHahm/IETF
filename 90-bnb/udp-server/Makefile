@@ -40,4 +40,6 @@ USEMODULE += vtimer
 USEMODULE += rpl
 USEMODULE += destiny
 
+export INCLUDES += -I$(CURDIR)
+
 include $(RIOTBASE)/Makefile.include
